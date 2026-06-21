@@ -109,7 +109,7 @@ function parser(context) {
         blocks.push({
             startTime: startTime,
             endTime: endTime,
-             ext: lyricText.trim()
+            text: lyricText.trim()
         });
     }
     return blocks;
