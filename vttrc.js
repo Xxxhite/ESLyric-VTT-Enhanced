@@ -95,20 +95,22 @@ function parser(context) {
 
         // 【核心修复 3 - 剔除冗余参数】：只截取纯时间部分，丢弃 VTT 时间轴特有的附加定位参数 (如 align:start)
         // 举例: "00:00:20.400 align:middle" 按空格切割后只提取第一部分 "00:00:20.400"
-        let start = startRaw.split(' ')[0];
-        let end = endRaw.split(' ')[0];
+        let start = startRaw.split(/\s+/)[0];
+        let end = endRaw.split(/\s+/)[0];
 
         // 【核心修复 4 - 内联标签清洗】：提取时间轴之后的所有行组合成歌词文本
         // 并使用正则表达式 /<[^>]+>/g 清除所有类似 <b>, <v Speaker> 的富文本标签，防止显示为乱码
         let lyricText = lines.slice(timeLineIndex + 1).join(' ').replace(/<[^>]+>/g, '');
 
         // 组装最终的区块对象并推入 blocks 数组
-        let block = {
-            startTime: toTimeStamp(start),
-            endTime: toTimeStamp(end),
-            text: lyricText
-        };
-        blocks.push(block);
+        const startTime = toTimeStamp(start);
+        const endTime = toTimeStamp(end);
+        if (!Number.isFinite(startTime) || !Number.isFinite(endTime) || endTime < startTime) continue;
+        blocks.push({
+            startTime: startTime,
+            endTime: endTime,
+             ext: lyricText.trim()
+        });
     }
     return blocks;
 }
